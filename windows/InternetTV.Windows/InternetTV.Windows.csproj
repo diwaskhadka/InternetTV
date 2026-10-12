@@ -27,7 +27,7 @@
     <Compile Include="..\..\bindings\csharp\IptvCore.cs" Link="IptvCore.cs" />
   </ItemGroup>
 
-  <!-- The Rust engine. Build it first:  cargo build --release -p iptvcore-ffi -->
+  <!-- The Rust engine must be built first (cargo build, release profile, package iptvcore-ffi). -->
   <PropertyGroup>
     <IptvNativeDir Condition="'$(IptvNativeDir)' == ''">$(MSBuildThisFileDirectory)..\..\target\release\</IptvNativeDir>
   </PropertyGroup>
