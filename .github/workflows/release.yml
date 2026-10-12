@@ -54,6 +54,38 @@ jobs:
           name: windows-${{ matrix.arch }}
           path: iptvcore-*.zip
 
+  windows-app:
+    name: windows app (InternetTV.exe)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - run: cargo build --release -p iptvcore-ffi
+      - name: Publish (self-contained, no .NET install needed)
+        run: dotnet publish windows/InternetTV.Windows/InternetTV.Windows.csproj -c Release -r win-x64 --self-contained true -o publish/InternetTV
+      - name: Smoke test - starts without errors
+        shell: pwsh
+        run: |
+          $log = Join-Path $env:LOCALAPPDATA "InternetTV\error.log"
+          Remove-Item $log -ErrorAction SilentlyContinue
+          $p = Start-Process publish/InternetTV/InternetTV.exe -PassThru
+          Start-Sleep -Seconds 20
+          $alive = -not $p.HasExited
+          if ($alive) { Stop-Process -Id $p.Id -Force }
+          if (Test-Path $log) { Get-Content $log; throw "InternetTV reported an error at startup" }
+          if (-not $alive) { throw "InternetTV exited during startup (code $($p.ExitCode))" }
+          Write-Host "InternetTV.exe started and stayed up for 20 s"
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path publish/InternetTV -DestinationPath InternetTV-${{ env.TAG }}-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-app
+          path: InternetTV-${{ env.TAG }}-windows-x64.zip
+
   android:
     runs-on: ubuntu-latest
     steps:
@@ -90,7 +122,7 @@ jobs:
             iptvcore-*-android-jniLibs.zip
 
   publish:
-    needs: [windows, android]
+    needs: [windows, windows-app, android]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -108,8 +140,10 @@ jobs:
             **Android TV:** `InternetTV-${{ env.TAG }}-androidtv.apk`. Install with `adb install -r <file>`.
             The APK is signed with a debug key: fine for sideloading, not for the Play Store.
 
-            **Windows:** `iptvcore-${{ env.TAG }}-windows-x64.zip` / `-arm64.zip` contain the engine as a DLL
-            (`iptvcore_ffi.dll` + import/static libs + C header + C# binding) and `iptv.exe`, a command-line
-            tool to inspect playlists/guides and benchmark. There is no Windows player app yet.
+            **Windows:** `InternetTV-${{ env.TAG }}-windows-x64.zip`. Unzip anywhere and run `InternetTV\InternetTV.exe`
+            (no installer, no .NET install needed; also runs on Windows on ARM).
+
+            **Developers:** `iptvcore-${{ env.TAG }}-windows-x64.zip` / `-arm64.zip` contain the engine as a DLL
+            (`iptvcore_ffi.dll` + import/static libs + C header + C# binding) and `iptv.exe`, a command-line tool.
 
             **Developers:** `iptvcore-${{ env.TAG }}-android-jniLibs.zip` has the native libraries for your own Android app.
