@@ -76,14 +76,17 @@ jobs:
       - name: Smoke test - starts without errors
         shell: pwsh
         run: |
+          $top = Get-ChildItem publish/InternetTV | ForEach-Object { if ($_.PSIsContainer) { "$($_.Name)/" } else { $_.Name } }
+          Write-Host "::notice::Publish folder: $($top -join ', ')"
+          Write-Host "::notice::libvlc/win-x64 present: $(Test-Path publish/InternetTV/libvlc/win-x64/libvlc.dll)"
           $log = Join-Path $env:LOCALAPPDATA "InternetTV\error.log"
           Remove-Item $log -ErrorAction SilentlyContinue
           $p = Start-Process publish/InternetTV/InternetTV.exe -PassThru
           Start-Sleep -Seconds 20
           $alive = -not $p.HasExited
           if ($alive) { Stop-Process -Id $p.Id -Force }
-          if (Test-Path $log) { Get-Content $log | Select-Object -First 30 | ForEach-Object { Write-Host "::error::$_" }; throw "InternetTV reported an error at startup" }
-          if (-not $alive) { throw "InternetTV exited during startup (code $($p.ExitCode))" }
+          if (Test-Path $log) { Get-Content $log | Select-Object -First 30 | ForEach-Object { Write-Host "::error::$_" }; exit 1 }
+          if (-not $alive) { Write-Host "::error::InternetTV exited during startup (code $($p.ExitCode))"; exit 1 }
           Write-Host "InternetTV.exe started and stayed up for 20 s"
       - name: Check layout and zip
         shell: pwsh
