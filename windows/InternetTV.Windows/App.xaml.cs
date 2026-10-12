@@ -11,8 +11,9 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         Directory.CreateDirectory(DataDir);
-        // Loads libvlc.dll from the libvlc\win-x64 folder next to the exe.
-        LibVLCSharp.Shared.Core.Initialize();
+        // Point LibVLC at the libvlc\win-x64 folder next to the exe explicitly:
+        // in a single-file app, assembly locations are empty, so auto-discovery fails.
+        LibVLCSharp.Shared.Core.Initialize(Path.Combine(AppContext.BaseDirectory, "libvlc", "win-x64"));
 
         DispatcherUnhandledException += (_, args) =>
         {

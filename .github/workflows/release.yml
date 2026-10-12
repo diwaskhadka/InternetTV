@@ -85,9 +85,17 @@ jobs:
           if (Test-Path $log) { Get-Content $log | Select-Object -First 30 | ForEach-Object { Write-Host "::error::$_" }; throw "InternetTV reported an error at startup" }
           if (-not $alive) { throw "InternetTV exited during startup (code $($p.ExitCode))" }
           Write-Host "InternetTV.exe started and stayed up for 20 s"
-      - name: Zip
+      - name: Check layout and zip
         shell: pwsh
-        run: Compress-Archive -Path publish/InternetTV -DestinationPath InternetTV-${{ env.TAG }}-windows-x64.zip
+        run: |
+          Copy-Item windows/README-FIRST.txt publish/InternetTV/
+          if (-not (Test-Path publish/InternetTV/InternetTV.exe)) { Write-Host "::error::InternetTV.exe missing from publish output"; exit 1 }
+          $top = Get-ChildItem publish/InternetTV | Select-Object -ExpandProperty Name
+          Write-Host "::notice::Top-level files: $($top -join ', ')"
+          if ($top.Count -gt 12) { Write-Host "::error::Too many top-level files ($($top.Count)); single-file publish did not apply"; exit 1 }
+          $mb = [math]::Round(((Get-ChildItem publish/InternetTV -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
+          Write-Host "::notice::Unpacked size: $mb MB"
+          Compress-Archive -Path publish/InternetTV -DestinationPath InternetTV-${{ env.TAG }}-windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: windows-app
