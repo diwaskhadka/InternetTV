@@ -120,7 +120,10 @@ def main(lib, out):
     for part, body in parts.items():
         core.import_bytes("xtream_part", json.dumps(body).encode(), source=xt, part=part)
     core.call("xtream_commit", source=xt)
-    core.import_bytes("xmltv", guide, keep_from=now - 86400)
+    # The app re-imports cached guides at start (the snapshot excludes EPG).
+    os.makedirs(os.path.join(out, "epg"), exist_ok=True)
+    with open(os.path.join(out, "epg", f"source-{xt}-0.xml"), "wb") as f:
+        f.write(guide)
 
     first_series = core.call("search", query="harbor", kind="series")[0]
     episodes = {"1": [{"id": str(9000 + e), "episode_num": e + 1, "title": f"Chapter {e + 1}", "container_extension": "mp4",

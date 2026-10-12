@@ -104,6 +104,27 @@ public partial class MainWindow : Window
             return;
         }
         if (_sources.Count == 0) OpenAddSource();
+        await RefreshStaleGuides();
+    }
+
+    /// <summary>Re-download guides older than 12 h in the background; never blocks watching.</summary>
+    private async Task RefreshStaleGuides()
+    {
+        foreach (var s in _sources.ToList())
+        {
+            try
+            {
+                if (_repo.EpgAge(s.Id) is { } age && age < TimeSpan.FromHours(12)) continue;
+                if (!await _repo.HasEpg(s.Id)) continue;
+                await _repo.RefreshEpg(s.Id);
+                if (ItemList.ItemsSource is IReadOnlyList<ItemVm> shown) await UpdateNowNext(shown);
+                if (_guideItem != null) await LoadGuide();
+            }
+            catch (Exception ex)
+            {
+                Repository.Log($"background guide refresh failed for {s.Name}: {ex.Message}");
+            }
+        }
     }
 
     /// <summary>

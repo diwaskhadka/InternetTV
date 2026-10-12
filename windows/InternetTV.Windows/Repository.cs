@@ -130,6 +130,14 @@ public sealed class Repository : IDisposable
     private readonly IptvCore _core = new();
     private readonly HttpClient _http;
     private string SnapshotPath => Path.Combine(App.DataDir, "catalog.jsonl");
+    /// <summary>
+    /// Downloaded guides are kept here and re-imported at start-up: the catalog
+    /// snapshot deliberately excludes EPG (it is large and goes stale).
+    /// </summary>
+    private static string EpgDir => Path.Combine(App.DataDir, "epg");
+    private static string EpgFile(int source, int index) => Path.Combine(EpgDir, $"source-{source}-{index}.xml");
+    private static IEnumerable<string> EpgFiles(int source) =>
+        Directory.Exists(EpgDir) ? Directory.EnumerateFiles(EpgDir, $"source-{source}-*.xml") : Enumerable.Empty<string>();
 
     public Repository()
     {
@@ -196,14 +204,32 @@ public sealed class Repository : IDisposable
 
     public Task Init() => Bg(() =>
     {
-        if (!File.Exists(SnapshotPath)) return;
-        try { _core.Call("load_snapshot", new { path = SnapshotPath }); }
-        catch (IptvException e)
+        if (File.Exists(SnapshotPath))
         {
-            Log($"snapshot unreadable, starting empty: {e.Message}");
-            File.Delete(SnapshotPath);
+            try { _core.Call("load_snapshot", new { path = SnapshotPath }); }
+            catch (IptvException e)
+            {
+                Log($"snapshot unreadable, starting empty: {e.Message}");
+                File.Delete(SnapshotPath);
+            }
+        }
+        if (!Directory.Exists(EpgDir)) return;
+        foreach (var f in Directory.EnumerateFiles(EpgDir, "*.xml"))
+        {
+            try { _core.Call("import_xmltv_file", new { path = f }); }
+            catch (IptvException e) { Log($"cached guide {Path.GetFileName(f)} unreadable: {e.Message}"); }
         }
     });
+
+    /// <summary>Age of the cached guide for a source, or null if none is cached.</summary>
+    public TimeSpan? EpgAge(int source)
+    {
+        var files = EpgFiles(source).ToList();
+        return files.Count == 0 ? null : DateTime.Now - files.Min(File.GetLastWriteTime);
+    }
+
+    /// <summary>Does this source announce any guide URL (playlist header or Xtream)?</summary>
+    public Task<bool> HasEpg(int source) => Bg(() => _core.Call("epg_fetch_urls", new { source }).GetArrayLength() > 0);
 
     public Task<List<Source>> Sources() => Bg(() =>
         _core.Call("sources").EnumerateArray()
@@ -239,6 +265,7 @@ public sealed class Repository : IDisposable
     public Task RemoveSource(int id) => Bg(() =>
     {
         _core.Call("remove_source", new { source = id });
+        foreach (var f in EpgFiles(id).ToList()) File.Delete(f);
         Save();
     });
 
@@ -266,14 +293,24 @@ public sealed class Repository : IDisposable
     public async Task RefreshEpg(int id)
     {
         var urls = await Bg(() => _core.Call("epg_fetch_urls", new { source = id }).EnumerateArray().Select(u => u.GetString() ?? "").ToList());
+        Directory.CreateDirectory(EpgDir);
+        var index = 0;
         foreach (var url in urls.Where(u => u.Length > 0))
         {
             string file;
             try { file = await Download(url, "guide"); }
             catch (Exception e) { Log($"guide download failed: {e.Message}"); continue; }
-            try { await Bg(() => _core.Call("import_xmltv_file", new { path = file })); }
-            finally { File.Delete(file); }
+            try
+            {
+                await Bg(() => _core.Call("import_xmltv_file", new { path = file }));
+                // Keep it for the next start (plain XML, already decompressed).
+                File.Move(file, EpgFile(id, index++), overwrite: true);
+            }
+            finally { if (File.Exists(file)) File.Delete(file); }
         }
+        // Drop cached guides of URLs the source no longer lists.
+        foreach (var stale in EpgFiles(id).Where(f => !Enumerable.Range(0, index).Select(i => EpgFile(id, i)).Contains(f)).ToList())
+            File.Delete(stale);
         await Bg(Save);
     }
 

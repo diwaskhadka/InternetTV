@@ -249,7 +249,7 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Tag="{Binding}" Click="Poster_Click" Cursor="Hand" Margin="0,0,20,24" Width="176" Focusable="False">
+                                    <Button Tag="{Binding}" Click="Poster_Click" Cursor="Hand" Margin="0,0,20,24" Width="176" Focusable="False" Foreground="{StaticResource Fg}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
                                                 <StackPanel>
@@ -357,7 +357,7 @@
                                     <ItemsControl x:Name="EpisodeList" MaxWidth="900" HorizontalAlignment="Left">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Button Tag="{Binding}" Click="Episode_Click" Cursor="Hand" Focusable="False">
+                                                <Button Tag="{Binding}" Click="Episode_Click" Cursor="Hand" Focusable="False" Foreground="{StaticResource Fg}">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border x:Name="Bd" CornerRadius="10" Background="{StaticResource Card}" Padding="16,12" Margin="0,0,0,8">
