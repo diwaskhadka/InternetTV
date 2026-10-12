@@ -65,7 +65,14 @@ jobs:
           dotnet-version: "8.0.x"
       - run: cargo build --release -p iptvcore-ffi
       - name: Publish (self-contained, no .NET install needed)
-        run: dotnet publish windows/InternetTV.Windows/InternetTV.Windows.csproj -c Release -r win-x64 --self-contained true -o publish/InternetTV
+        shell: pwsh
+        # Errors are re-emitted as annotations so they are visible via the API, not only in raw logs.
+        run: |
+          dotnet publish windows/InternetTV.Windows/InternetTV.Windows.csproj -c Release -r win-x64 --self-contained true -o publish/InternetTV 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) {
+            Select-String -Path build.log -Pattern ': error |error NU|error MSB|error CS' | Select-Object -First 40 | ForEach-Object { Write-Host "::error::$($_.Line.Trim())" }
+            exit 1
+          }
       - name: Smoke test - starts without errors
         shell: pwsh
         run: |
@@ -75,7 +82,7 @@ jobs:
           Start-Sleep -Seconds 20
           $alive = -not $p.HasExited
           if ($alive) { Stop-Process -Id $p.Id -Force }
-          if (Test-Path $log) { Get-Content $log; throw "InternetTV reported an error at startup" }
+          if (Test-Path $log) { Get-Content $log | Select-Object -First 30 | ForEach-Object { Write-Host "::error::$_" }; throw "InternetTV reported an error at startup" }
           if (-not $alive) { throw "InternetTV exited during startup (code $($p.ExitCode))" }
           Write-Host "InternetTV.exe started and stayed up for 20 s"
       - name: Zip
