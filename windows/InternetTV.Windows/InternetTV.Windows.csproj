@@ -28,6 +28,10 @@
   <ItemGroup>
     <PackageReference Include="LibVLCSharp.WPF" Version="3.9.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
+    <!-- In-app YouTube trailers (Edge WebView2, preinstalled on Windows 10/11). -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
+    <!-- Encrypts the optional OpenSubtitles password for the current Windows user. -->
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
   <!-- One copy of the C# binding, shared with other .NET hosts. -->
