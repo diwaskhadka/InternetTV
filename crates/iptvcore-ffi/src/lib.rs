@@ -20,7 +20,7 @@
 //!
 //! The method list lives in [`dispatch`]; see `docs/API.md`.
 
-use iptvcore::catalog::{SearchFilter, SourceKind};
+use iptvcore::catalog::{ListQuery, SearchFilter, Sort, SourceKind};
 use iptvcore::json::{self, ToJson, Value, obj};
 use iptvcore::xtream::{XtreamClient, XtreamCredentials, XtreamSnapshot};
 use iptvcore::{Catalog, Error, Item, ItemId, ItemKind, Result, SourceId, m3u, time};
@@ -184,6 +184,35 @@ pub fn dispatch(st: &mut State, method: &str, a: &Value) -> Result<Value> {
             c.rename_source(arg_source(a)?, &arg_str(a, "name")?)?;
             Value::Null
         }
+        // Edit a source. Omitted fields (and an empty password) keep their value.
+        "update_source" => {
+            let id = arg_source(a)?;
+            if let Some(n) = opt_str(a, "name") {
+                c.rename_source(id, &n)?;
+            }
+            let kind = match &c
+                .source(id)
+                .ok_or_else(|| Error::NotFound(format!("source {id}")))?
+                .kind
+            {
+                SourceKind::M3u { location } => SourceKind::M3u {
+                    location: opt_str(a, "location").unwrap_or_else(|| location.clone()),
+                },
+                SourceKind::Xtream(old) => {
+                    let mut cr = XtreamCredentials::new(
+                        &opt_str(a, "server").unwrap_or_else(|| old.server.clone()),
+                        &opt_str(a, "username").unwrap_or_else(|| old.username.clone()),
+                        &opt_str(a, "password").unwrap_or_else(|| old.password.clone()),
+                    );
+                    cr.live_ext = opt_str(a, "live_ext").unwrap_or_else(|| old.live_ext.clone());
+                    SourceKind::Xtream(cr)
+                }
+            };
+            c.update_source(id, kind)?;
+            Value::Null
+        }
+        // Xtream account endpoint (status, expiry, connections). Contains the login.
+        "account_url" => xtream_client(c, arg_source(a)?)?.api_url(None, &[]).into(),
         "remove_source" => {
             let s = arg_source(a)?;
             c.remove_source(s)?;
@@ -254,6 +283,14 @@ pub fn dispatch(st: &mut State, method: &str, a: &Value) -> Result<Value> {
             x.api_url(Some("get_series_info"), &[("series_id", &it.remote_id)])
                 .into()
         }
+        "vod_info_url" => {
+            let it = c
+                .item(arg_id(a, "id")?)
+                .ok_or_else(|| Error::NotFound("item".into()))?;
+            let x = xtream_client(c, it.source)?;
+            x.api_url(Some("get_vod_info"), &[("vod_id", &it.remote_id)])
+                .into()
+        }
         "short_epg_url" => {
             let it = c
                 .item(arg_id(a, "id")?)
@@ -301,6 +338,31 @@ pub fn dispatch(st: &mut State, method: &str, a: &Value) -> Result<Value> {
                 usize_or(a, "limit", 100),
             );
             items_json(&v)
+        }
+        // Sorted/filtered/paged listing: {kind, source?, group?, hidden_groups?[],
+        // sort?, min_rating?, offset?, limit?} -> {total, items}
+        "query" => {
+            let mut q = ListQuery::new(arg_kind(a)?);
+            q.source = a.int("source").map(|s| s as SourceId);
+            q.group = opt_str(a, "group");
+            q.hidden_groups = a
+                .get("hidden_groups")
+                .and_then(Value::as_array)
+                .map(|v| {
+                    v.iter()
+                        .filter_map(|g| g.as_str().map(str::to_string))
+                        .collect()
+                })
+                .unwrap_or_default();
+            if let Some(sort) = opt_str(a, "sort") {
+                q.sort = Sort::parse(&sort)
+                    .ok_or_else(|| Error::Invalid(format!("unknown sort '{sort}'")))?;
+            }
+            q.min_rating = a.num("min_rating").unwrap_or(0.0);
+            q.offset = usize_or(a, "offset", 0);
+            q.limit = usize_or(a, "limit", 100);
+            let (total, page) = c.query(&q);
+            obj([("total", total.into()), ("items", items_json(&page))])
         }
         "item" => {
             let it = c
