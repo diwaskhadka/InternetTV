@@ -251,11 +251,14 @@ public partial class MainWindow : Window
         var movies = await _repo.CountKind(_source.Id, "movie");
         var series = await _repo.CountKind(_source.Id, "series");
         var parts = new List<string>();
-        if (live > 0) parts.Add($"{live:N0} channels");
-        if (movies > 0) parts.Add($"{movies:N0} movies");
-        if (series > 0) parts.Add($"{series:N0} series");
+        if (live > 0) parts.Add($"{Compact(live)} channels");
+        if (movies > 0) parts.Add($"{Compact(movies)} movies");
+        if (series > 0) parts.Add($"{Compact(series)} series");
         PlaylistCount.Text = parts.Count > 0 ? string.Join(" · ", parts) : (_source.Kind == "xtream" ? "Xtream Code" : "M3U playlist");
     }
+
+    /// <summary>53,324 → "53K", 950 → "950".</summary>
+    private static string Compact(int n) => n >= 10_000 ? $"{n / 1000:N0}K" : n.ToString("N0");
 
     private void PlaylistButton_Click(object sender, MouseButtonEventArgs e)
     {
@@ -352,9 +355,9 @@ public partial class MainWindow : Window
         var showPlayer = playingVod || (!vod && !details) || _fullscreen;
 
         CatsPanel.Visibility = showCats ? Visibility.Visible : Visibility.Collapsed;
-        ColCats.Width = new GridLength(showCats ? 250 : 0);
+        ColCats.Width = new GridLength(showCats ? 240 : 0);
         ListPanel.Visibility = showList ? Visibility.Visible : Visibility.Collapsed;
-        ColList.Width = showList ? new GridLength(430) : new GridLength(0);
+        ColList.Width = showList ? new GridLength(350) : new GridLength(0);
         GridPanel.Visibility = showGrid ? Visibility.Visible : Visibility.Collapsed;
         DetailsPanel.Visibility = details && !_fullscreen ? Visibility.Visible : Visibility.Collapsed;
         PlayerPanel.Visibility = showPlayer ? Visibility.Visible : Visibility.Collapsed;
@@ -363,7 +366,7 @@ public partial class MainWindow : Window
         GuidePanel.Visibility = !_fullscreen && liveGuide && !playingVod ? Visibility.Visible : Visibility.Collapsed;
         ControlBar.Visibility = !_fullscreen && (playingVod || Playing is { IsLive: false }) ? Visibility.Visible : Visibility.Collapsed;
         GuideRow.Height = _fullscreen ? new GridLength(0)
-            : GuidePanel.Visibility == Visibility.Visible ? new GridLength(1.15, GridUnitType.Star)
+            : GuidePanel.Visibility == Visibility.Visible ? new GridLength(1, GridUnitType.Star)
             : GridLength.Auto;
 
         RailCol.Width = new GridLength(_fullscreen ? 0 : 64);
@@ -454,14 +457,23 @@ public partial class MainWindow : Window
     {
         for (var i = 0; i < items.Count; i++)
         {
-            items[i].Number = i + 1;
             items[i].IsFavorite = _favorites.Contains(items[i].Id);
         }
         ItemList.ItemsSource = items;
         ListCount.Text = items.Count > 0 ? $"{items.Count:N0}" : "";
         ListEmpty.Text = emptyText;
         ListEmpty.Visibility = items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        if (Playing is { } p && items.FirstOrDefault(i => i.Id == p.Id) is { } same) ItemList.SelectedItem = same;
+        if (Playing is { } p && items.FirstOrDefault(i => i.Id == p.Id) is { } same)
+        {
+            ItemList.SelectedItem = same;
+        }
+        else if (Playing == null && items.FirstOrDefault(i => i.IsLive) is { } firstLive)
+        {
+            // Show something in the guide pane immediately (selection does not start playback).
+            _guideItem = firstLive;
+            _guideDay = DateTime.Today;
+            _ = LoadGuide();
+        }
         _ = UpdateNowNext(items);
     }
 

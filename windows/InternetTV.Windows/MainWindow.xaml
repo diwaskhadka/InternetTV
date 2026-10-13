@@ -46,7 +46,7 @@
             <!-- ============================================= top bar -->
             <Grid Margin="14,12,14,4">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="Auto" MinWidth="240" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -66,7 +66,7 @@
                         </Border>
                         <StackPanel Grid.Column="1" Margin="10,0" VerticalAlignment="Center">
                             <TextBlock x:Name="PlaylistName" Text="No playlist" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                            <TextBlock x:Name="PlaylistCount" Text="Add a source to begin" FontSize="12" Foreground="{StaticResource Muted}" />
+                            <TextBlock x:Name="PlaylistCount" Text="Add a source to begin" FontSize="11.5" Foreground="{StaticResource Muted}" MaxWidth="420" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <TextBlock Grid.Column="2" Text="&#xE70D;" FontFamily="{StaticResource Icons}" FontSize="12"
                                    Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
@@ -108,8 +108,8 @@
             <!-- ============================================= body -->
             <Grid Grid.Row="1" Margin="14,8,14,14">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="ColCats" Width="250" />
-                    <ColumnDefinition x:Name="ColList" Width="430" />
+                    <ColumnDefinition x:Name="ColCats" Width="240" />
+                    <ColumnDefinition x:Name="ColList" Width="350" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
@@ -125,10 +125,12 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}" FontSize="14" TextTrimming="CharacterEllipsis"
+                                    <TextBlock Text="{Binding Name}" FontSize="13.5" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Count}" FontSize="12" Foreground="{StaticResource Muted}"
-                                               Margin="10,0,0,0" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" CornerRadius="9" Background="#22263A" Padding="7,1" Margin="10,0,0,0"
+                                            VerticalAlignment="Center" MinWidth="26">
+                                        <TextBlock Text="{Binding Count}" FontSize="11" Foreground="{StaticResource Muted}" HorizontalAlignment="Center" />
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -146,7 +148,7 @@
                     </StackPanel>
                     <Grid>
                         <TextBlock x:Name="ListEmpty" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="6,10" Visibility="Collapsed" />
-                        <ListBox x:Name="ItemList" Style="{StaticResource PlainList}" ItemContainerStyle="{StaticResource CardItem}"
+                        <ListBox x:Name="ItemList" Style="{StaticResource PlainList}" ItemContainerStyle="{StaticResource RowItem}"
                                  MouseLeftButtonUp="ItemList_MouseLeftButtonUp" KeyDown="ItemList_KeyDown"
                                  SelectionChanged="ItemList_SelectionChanged">
                             <ListBox.ContextMenu>
@@ -159,20 +161,20 @@
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="56" />
+                                            <ColumnDefinition Width="44" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="50" Height="50" CornerRadius="10" Background="#262B3D" VerticalAlignment="Center">
+                                        <Border Width="40" Height="40" CornerRadius="8" Background="#262B3D" VerticalAlignment="Center">
                                             <Grid>
                                                 <TextBlock Text="{Binding Initials}" FontSize="14" Foreground="{StaticResource Muted}"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                <Image Source="{Binding Logo}" Stretch="Uniform" Margin="5" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                <Image Source="{Binding Logo}" Stretch="Uniform" Margin="3" RenderOptions.BitmapScalingMode="HighQuality" />
                                             </Grid>
                                         </Border>
-                                        <StackPanel Grid.Column="1" Margin="12,0,6,0" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock FontSize="13" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
+                                        <StackPanel Grid.Column="1" Margin="10,0,4,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock FontSize="12" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="{Binding Subtitle}" />
@@ -184,7 +186,7 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                            <Grid Margin="0,5,0,0" Visibility="{Binding HasNow, Converter={StaticResource BoolVis}}">
+                                            <Grid Margin="0,3,0,0" Visibility="{Binding HasNow, Converter={StaticResource BoolVis}}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
@@ -197,7 +199,7 @@
                                             </Grid>
                                         </StackPanel>
                                         <Button Grid.Column="2" Content="{Binding StarGlyph}" Tag="{Binding}" Click="Star_Click"
-                                                ToolTip="Favorite" VerticalAlignment="Center">
+                                                ToolTip="Favorite" VerticalAlignment="Top" Width="30" Height="30" FontSize="13">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
                                                     <Setter Property="Foreground" Value="{StaticResource Muted}" />
@@ -399,8 +401,8 @@
                 <!-- Player + guide -->
                 <Grid x:Name="PlayerPanel" Grid.Column="2">
                     <Grid.RowDefinitions>
-                        <RowDefinition x:Name="VideoRow" Height="*" MinHeight="200" />
-                        <RowDefinition x:Name="GuideRow" Height="1.15*" />
+                        <RowDefinition x:Name="VideoRow" Height="1.35*" MinHeight="200" />
+                        <RowDefinition x:Name="GuideRow" Height="*" />
                     </Grid.RowDefinitions>
                     <Grid Background="Black">
                         <StackPanel x:Name="VideoHint" HorizontalAlignment="Center" VerticalAlignment="Center">
