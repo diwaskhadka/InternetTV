@@ -117,6 +117,13 @@ fn item_rich(c: &Catalog, it: &Item) -> Value {
     let mut v = it.to_json();
     if let Value::Object(m) = &mut v {
         m.insert("favorite".into(), c.is_favorite(it.id).into());
+        if it.kind == ItemKind::Episode {
+            if let Some(sid) = it.extra("series_id") {
+                // Lets the UI open the series page from an episode (continue watching).
+                let series = iptvcore::item_id(it.source, ItemKind::Series, sid);
+                m.insert("series".into(), series.to_string().into());
+            }
+        }
         if let Some(p) = c.progress(it.id) {
             m.insert(
                 "progress".into(),
@@ -370,7 +377,12 @@ pub fn dispatch(st: &mut State, method: &str, a: &Value) -> Result<Value> {
                 .ok_or_else(|| Error::NotFound("item".into()))?;
             item_rich(c, it)
         }
-        "episodes" => items_json(&c.episodes(arg_id(a, "id")?)),
+        "episodes" => Value::Array(
+            c.episodes(arg_id(a, "id")?)
+                .into_iter()
+                .map(|it| item_rich(c, it))
+                .collect(),
+        ),
         "search" => {
             let f = SearchFilter {
                 kind: opt_kind(a)?,

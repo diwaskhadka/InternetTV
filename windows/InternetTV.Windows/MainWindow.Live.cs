@@ -389,7 +389,7 @@ public partial class MainWindow
         }
         Layout();
         _player.Play(media);
-        _player.Rate = 1;
+        _player.SetRate(1);
         _ = _repo.RecordPlay(it.Id);
         SetStatus("");
 

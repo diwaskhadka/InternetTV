@@ -81,6 +81,8 @@ public sealed class ItemVm : Observable
     public string? Season { get; init; }
     public string? Episode { get; init; }
     public int SourceId { get; init; }
+    /// <summary>For episodes: id of the series item (opens the series page).</summary>
+    public string? SeriesId { get; init; }
     public long AddedAt { get; init; }
     public long PlayedAt { get; init; }
     public double PositionSec { get; init; }
@@ -117,6 +119,14 @@ public sealed class ItemVm : Observable
     /// <summary>Position in the current list, shown as "12. Channel".</summary>
     public int Number { get => _number; set { Set(ref _number, value); Raise(nameof(Title)); } }
     public string Title => Number > 0 && IsLive ? $"{Number}. {DisplayName}" : DisplayName;
+
+    /// <summary>Re-evaluate display text after a naming setting changed.</summary>
+    public void Refresh()
+    {
+        Raise(nameof(DisplayName));
+        Raise(nameof(Title));
+        Raise(nameof(Initials));
+    }
 
     /// <summary>"CA EN: CBC Calgary" → "CBC Calgary" when Settings → Strip country prefixes is on.</summary>
     public string DisplayName => AppSettings.Current.StripPrefixes && IsLive ? StripPrefix(Name) : Name;
@@ -274,6 +284,7 @@ public sealed class Repository : IDisposable
             Season = Str(extra, "season"),
             Episode = Str(extra, "episode"),
             SourceId = (int)Long(o, "source"),
+            SeriesId = Str(o, "series"),
             AddedAt = Long(extra, "added") is var a and > 0 ? a : Long(extra, "last_modified"),
             PlayedAt = Long(o, "played_at"),
             PositionSec = Dbl(progress, "position"),

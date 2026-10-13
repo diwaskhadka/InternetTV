@@ -51,6 +51,7 @@ public partial class MainWindow : Window
 
     public Repository Repo => _repo;
     public IReadOnlyList<Source> SourcesList => _sources;
+    public Source? CurrentSource => _source;
 
     public MainWindow()
     {
@@ -136,7 +137,10 @@ public partial class MainWindow : Window
             await ReloadSources();
         });
         var wanted = Arg("--mode") ?? (S.StartupView == "Last" ? S.LastView : S.StartupView);
-        var start = Enum.TryParse<Mode>(wanted, true, out var parsed) && parsed is not (Mode.Search or Mode.Settings) ? parsed : Mode.Dashboard;
+        // Search is only a start view when asked for on the command line (CI screenshots).
+        var start = Enum.TryParse<Mode>(wanted, true, out var parsed) && parsed != Mode.Settings && (parsed != Mode.Search || Arg("--mode") != null)
+            ? parsed
+            : Mode.Dashboard;
         NavButton(start).IsChecked = true; // → Nav_Checked → ShowMode
         _tick.Start();
         if (S.WindowStartup == "Fullscreen" && Arg("--screenshot") == null) ToggleFullscreen(force: true);
