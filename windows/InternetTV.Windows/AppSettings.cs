@@ -134,8 +134,10 @@ public sealed class AppSettings
         foreach (var (key, hex) in LightPalette)
         {
             var color = (Color)ColorConverter.ConvertFromString(hex);
-            if (res[key] is SolidColorBrush { IsFrozen: false } b) b.Color = color;
-            else res[key] = new SolidColorBrush(color);
+            // Replace (not mutate): brushes referenced by templates are frozen at load.
+            // App.xaml styles use DynamicResource for these keys, so they follow the swap;
+            // window XAML loads later and picks the new brushes up via StaticResource.
+            if (res.Contains(key)) res[key] = new SolidColorBrush(color);
             if (res.Contains(key + "Color")) res[key + "Color"] = color;
         }
     }
