@@ -289,7 +289,10 @@ pub fn item_added(i: &Item) -> i64 {
 /// Rating on a 0–10 scale. Providers sometimes send 0–100 values ("72") or junk ("7125");
 /// the first are scaled down, the rest ignored so they cannot top "Top rated".
 pub fn item_rating(i: &Item) -> f64 {
-    normalize_rating(i.extra("rating").and_then(|v| v.trim().replace(',', ".").parse::<f64>().ok()))
+    normalize_rating(
+        i.extra("rating")
+            .and_then(|v| v.trim().replace(',', ".").parse::<f64>().ok()),
+    )
 }
 
 pub fn normalize_rating(r: Option<f64>) -> f64 {
