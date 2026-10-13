@@ -87,7 +87,7 @@ public partial class MainWindow : Window
 
     private void RestoreWindowPlacement()
     {
-        if (S.WinWidth is > 400 and var w && S.WinHeight is > 300 and var h)
+        if (S.WinWidth is double w and > 400 && S.WinHeight is double h and > 300)
         {
             var vs = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
                               SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
@@ -1135,11 +1135,7 @@ public partial class MainWindow : Window
                 Background = (Brush)FindResource(p.IsLive ? "CardSelected" : "Card"),
                 Padding = new Thickness(8, 6, 6, 6),
                 Opacity = p.IsPast ? 0.55 : 1,
-                ToolTip = string.IsNullOrWhiteSpace(p.Desc) ? $"{p.TimeRange}
-{p.Title}" : $"{p.TimeRange}
-{p.Title}
-
-{p.Desc}",
+                ToolTip = string.IsNullOrWhiteSpace(p.Desc) ? $"{p.TimeRange}\n{p.Title}" : $"{p.TimeRange}\n{p.Title}\n\n{p.Desc}",
                 ClipToBounds = true,
             };
             var inner = new StackPanel();
