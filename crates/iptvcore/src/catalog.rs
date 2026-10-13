@@ -850,6 +850,20 @@ impl Catalog {
         self.history.truncate(HISTORY_CAP);
     }
 
+    /// Forget one item from "recently watched" (its resume position stays).
+    pub fn remove_from_history(&mut self, id: ItemId) {
+        self.history.retain(|(i, _)| *i != id);
+    }
+
+    pub fn clear_history(&mut self) {
+        self.history.clear();
+    }
+
+    /// When an item was last played (Unix seconds).
+    pub fn last_played(&self, id: ItemId) -> Option<i64> {
+        self.history.iter().find(|(i, _)| *i == id).map(|(_, t)| *t)
+    }
+
     pub fn recent(&self, kind: Option<ItemKind>, limit: usize) -> Vec<&Item> {
         self.history
             .iter()

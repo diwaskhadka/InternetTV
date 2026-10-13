@@ -429,7 +429,12 @@ pub fn dispatch(st: &mut State, method: &str, a: &Value) -> Result<Value> {
             );
             Value::Null
         }
-        "favorites" => items_json(&c.favorites(opt_kind(a)?)),
+        "favorites" => Value::Array(
+            c.favorites(opt_kind(a)?)
+                .into_iter()
+                .map(|it| item_rich(c, it))
+                .collect(),
+        ),
         "set_progress" => {
             let pos = a
                 .num("position")
@@ -447,7 +452,26 @@ pub fn dispatch(st: &mut State, method: &str, a: &Value) -> Result<Value> {
             c.record_play(arg_id(a, "id")?, now);
             Value::Null
         }
-        "recent" => items_json(&c.recent(opt_kind(a)?, usize_or(a, "limit", 20))),
+        "recent" => Value::Array(
+            c.recent(opt_kind(a)?, usize_or(a, "limit", 20))
+                .into_iter()
+                .map(|it| {
+                    let mut v = item_rich(c, it);
+                    if let (Value::Object(m), Some(t)) = (&mut v, c.last_played(it.id)) {
+                        m.insert("played_at".into(), t.into());
+                    }
+                    v
+                })
+                .collect(),
+        ),
+        "remove_history" => {
+            c.remove_from_history(arg_id(a, "id")?);
+            Value::Null
+        }
+        "clear_history" => {
+            c.clear_history();
+            Value::Null
+        }
         "export_user_state" => c.export_user_state(),
         "import_user_state" => {
             c.import_user_state(
