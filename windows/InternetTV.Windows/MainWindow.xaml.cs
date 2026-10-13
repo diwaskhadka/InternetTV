@@ -222,6 +222,12 @@ public partial class MainWindow : Window
         {
             await ShowDetails(first);
             await Task.Delay(1500);
+            if (Environment.GetCommandLineArgs().Contains("--play-first"))
+            {
+                if (first.IsSeries && _episodes.FirstOrDefault() is { } ep) await PlayEpisode(ep);
+                else await PlayMovie();
+                await Task.Delay(2500);
+            }
         }
         if (_mode == Mode.Live && ItemList.Items.Count > 0)
         {

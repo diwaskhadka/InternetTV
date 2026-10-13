@@ -128,6 +128,8 @@ jobs:
             "12-settings-dash"  = @("--mode", "Live", "--settings", "Dashboard")
             "13-light-dash"     = @("--mode", "Dashboard", "--light")
             "14-light-details"  = @("--mode", "Series", "--open-first", "--light")
+            "15-movie-playing"  = @("--mode", "Movies", "--open-first", "--play-first")
+            "16-episode-playing" = @("--mode", "Series", "--open-first", "--play-first")
           }
           foreach ($name in $cases.Keys) {
             $out = Join-Path (Resolve-Path shots) "$name.png"

@@ -72,7 +72,7 @@ public static class UiKit
         var fg = secondary ? "Fg" : "PrimaryFg";
         if (glyph != null) row.Children.Add(new TextBlock { Text = glyph, FontFamily = Icons, Foreground = B(fg), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) });
         row.Children.Add(new TextBlock { Text = label, Foreground = B(fg), VerticalAlignment = VerticalAlignment.Center });
-        var b = new Button { Content = row, Style = St(secondary ? "SecondaryButton" : "PrimaryButton"), Margin = new Thickness(0, 0, 10, 0) };
+        var b = new Button { Content = row, Style = St(secondary ? "SecondaryButton" : "PrimaryButton"), Margin = new Thickness(0, 0, 10, 10) };
         b.Click += (_, _) => onClick();
         return b;
     }
@@ -143,7 +143,7 @@ public static class UiKit
             var rb = Badge($"★ {it.Rating}");
             rb.HorizontalAlignment = HorizontalAlignment.Right;
             rb.VerticalAlignment = VerticalAlignment.Top;
-            rb.Margin = new Thickness(7);
+            rb.Margin = remove != null ? new Thickness(7, 7, 36, 7) : new Thickness(7); // leave room for ✕
             img.Children.Add(rb);
         }
         if (it.DurationSec > 0 && it.WatchedRatio > 0)
