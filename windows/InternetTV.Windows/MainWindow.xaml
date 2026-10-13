@@ -241,7 +241,7 @@
                             <Grid x:Name="LiveVideoHost">
                                 <vlc:VideoView x:Name="Video" Visibility="Collapsed">
                                     <!-- Drawn in VLC's overlay window above the video: click = pause, double-click = full screen. -->
-                                    <Grid x:Name="VideoOverlay" Background="#01000000" Loaded="Overlay_Loaded"
+                                    <Grid x:Name="VideoOverlay" Visibility="Collapsed" Background="#01000000" Loaded="Overlay_Loaded"
                                           MouseLeftButtonDown="Overlay_MouseLeftButtonDown" MouseMove="Overlay_MouseMove">
                                         <Border x:Name="Osd" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,22,0,0" CornerRadius="10"
                                                 Background="#CC000000" Padding="16,8" Visibility="Collapsed" IsHitTestVisible="False">
@@ -278,13 +278,13 @@
                                                         <Button x:Name="Back10Btn" Style="{StaticResource PlayerButton}" ToolTip="Back 10 s (←)" Click="Back10_Click">
                                                             <Grid>
                                                                 <TextBlock Text="&#xE7A7;" FontFamily="{StaticResource Icons}" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                <TextBlock Text="10" FontFamily="{StaticResource UiFont}" FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,3,0,0" />
+                                                                <TextBlock Text="10" FontFamily="{StaticResource UiFont}" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,0" />
                                                             </Grid>
                                                         </Button>
                                                         <Button x:Name="Fwd10Btn" Style="{StaticResource PlayerButton}" ToolTip="Forward 10 s (→)" Click="Fwd10_Click">
                                                             <Grid>
                                                                 <TextBlock Text="&#xE7A6;" FontFamily="{StaticResource Icons}" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                <TextBlock Text="10" FontFamily="{StaticResource UiFont}" FontSize="8" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,3,0,0" />
+                                                                <TextBlock Text="10" FontFamily="{StaticResource UiFont}" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,0" />
                                                             </Grid>
                                                         </Button>
                                                         <Button x:Name="NextEpisodeBtn" Style="{StaticResource PlayerButton}" Content="&#xE893;" ToolTip="Next episode" Click="NextEpisode_Click" Visibility="Collapsed" />
