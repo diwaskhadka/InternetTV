@@ -414,7 +414,7 @@ public partial class MainWindow
             TimeLen.Text = "";
             NextEpisodeBtn.Visibility = it.Kind == "episode" && _playIndex < _playlist.Count - 1 ? Visibility.Visible : Visibility.Collapsed;
             VodHeaderTitle.Text = it.Kind == "episode" && _details != null && _details.Id != it.Id
-                ? $"{_details.DisplayName} · S{it.Season} E{it.Episode} · {it.DisplayName}"
+                ? $"{_details.DisplayName} · {SE(it)} · {it.DisplayName}"
                 : it.DisplayName;
             RenderVodPage();
         }
