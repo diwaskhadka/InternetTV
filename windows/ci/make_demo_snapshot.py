@@ -2,7 +2,7 @@
 
     python make_demo_snapshot.py <path/to/iptvcore_ffi.dll> <out-dir>
 
-Writes <out-dir>/catalog.jsonl (what InternetTV loads at start) plus generated
+Writes <out-dir>/catalog.jsonl (what the app loads at start) plus generated
 logo/poster PNGs. All names are fictional.
 """
 
@@ -101,7 +101,7 @@ def main(lib, out):
             vods.append({"stream_id": 1000 + i, "name": title, "stream_icon": poster, "category_id": str(ci + 1),
                          "rating": str(rating), "year": str(year), "container_extension": "mp4",
                          "added": str(int(time.time()) - i * 86400 - 3600),
-                         "plot": f"{title} is a fictional film used to preview InternetTV's movie page. "
+                         "plot": f"{title} is a fictional film used to preview Madhyasthata's movie page. "
                                  "Every sunrise needs a signal; this one arrives a little late."})
             i += 1
     series = []

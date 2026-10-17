@@ -8,7 +8,7 @@ using System.Windows.Media.Animation;
 namespace InternetTV.Windows;
 
 /// <summary>
-/// InternetTV's own motion language (deliberately not IPTVnator's plain cross-fade):
+/// The app's own motion language (deliberately not IPTVnator's plain cross-fade):
 /// pages "rise" a few pixels while fading in, menus "unfold" from their button,
 /// and buttons give a short springy press.
 /// </summary>

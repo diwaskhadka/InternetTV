@@ -8,15 +8,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- LibraryImport (P/Invoke source generator) marshals byte[] through pointers. -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>InternetTV</AssemblyName>
+    <!-- Madhyasthata.exe. Fixed: shortcuts, the installer and the CI checks use this file name. -->
+    <AssemblyName>Madhyasthata</AssemblyName>
     <RootNamespace>InternetTV.Windows</RootNamespace>
-    <Version>0.4.11</Version>
-    <Product>InternetTV</Product>
-    <ApplicationIcon>Assets\InternetTV.ico</ApplicationIcon>
+    <!-- One version for every platform: the repository VERSION file (docs/RELEASING.md). -->
+    <Version>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../VERSION').Trim())</Version>
+    <!-- Display name from branding/brand.ini, shared by every platform. Brand.cs reads it back. -->
+    <BrandIni>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../branding/brand.ini'))</BrandIni>
+    <Product>$([System.Text.RegularExpressions.Regex]::Match('$(BrandIni)', '(?m)^name=(.+?)\s*$').Groups[1].Value)</Product>
+    <AssemblyTitle>$(Product)</AssemblyTitle>
+    <BrandNativeName>$([System.Text.RegularExpressions.Regex]::Match('$(BrandIni)', '(?m)^native_name=(.+?)\s*$').Groups[1].Value)</BrandNativeName>
+    <!-- Rendered from branding/icon.svg by branding/build.py. -->
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <!-- LibVLC for Windows ships x64/x86 only; x64 also runs on Windows on ARM (emulated). -->
     <PlatformTarget>x64</PlatformTarget>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <!-- Publish as one InternetTV.exe (.NET runtime + managed code inside) instead of hundreds of
+    <!-- Publish as one Madhyasthata.exe (.NET runtime + managed code inside) instead of hundreds of
          loose DLLs. Native DLLs stay beside it on purpose: libvlc.dll must sit next to its plugins
          folder, which breaks if it is packed into the exe (IncludeNativeLibrariesForSelfExtract). -->
     <PublishSingleFile>true</PublishSingleFile>
@@ -39,9 +46,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\InternetTV.ico" />
-    <Resource Include="Assets\InternetTV-64.png" />
-    <Resource Include="Assets\InternetTV-256.png" />
+    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\app-64.png" />
+    <Resource Include="Assets\app-256.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="BrandNativeName" Value="$(BrandNativeName)" />
   </ItemGroup>
 
   <!-- One copy of the C# binding, shared with other .NET hosts. -->

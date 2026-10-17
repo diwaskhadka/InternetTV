@@ -1,40 +1,49 @@
-; InternetTV setup (Inno Setup 6). A regular Windows installer: wizard, Start menu and optional
+; Madhyasthata setup (Inno Setup 6). A regular Windows installer: wizard, Start menu and optional
 ; desktop shortcut, uninstaller in Settings > Apps. Installs for the current user without an admin
 ; prompt (or for all users when run as admin). Re-running a newer setup upgrades in place.
-; Playlists and settings live in %LOCALAPPDATA%\InternetTV and are never touched by setup.
+; Playlists and settings live in %LOCALAPPDATA%\Madhyasthata and are never touched by setup
+; (the app moves InternetTV 0.4.x's %LOCALAPPDATA%\InternetTV there on first start).
 ;
 ; Build: iscc /DAppVersion=0.4.11 /DSourceDir=<publish folder> /DOutputDir=<dir> InternetTV.iss
+
+; Display name from branding/brand.ini (shared by every platform).
+#define AppName ReadIni(AddBackslash(SourcePath) + "..\..\branding\brand.ini", "brand", "name", "Madhyasthata")
+; Fixed from 0.9.0 on: the exe name (shortcuts point at it). Before 0.9.0 it was InternetTV.exe.
+#define AppExe "Madhyasthata.exe"
 
 #ifndef AppVersion
   #define AppVersion "0.0.0"
 #endif
 #ifndef SourceDir
-  #define SourceDir "..\..\publish\InternetTV"
+  #define SourceDir "..\..\publish\Madhyasthata"
 #endif
 #ifndef OutputDir
   #define OutputDir "."
 #endif
 
 [Setup]
+; Never change AppId: setup uses it to find the installed copy to upgrade. It is InternetTV
+; 0.4.x's id, so 0.9.0 upgrades those installs (in their old folder) instead of adding a second app.
 AppId={{6B0E4C4D-7E2A-4C1B-9B57-2E7F0C1A9D41}
-AppName=InternetTV
+AppName={#AppName}
 AppVersion={#AppVersion}
-AppVerName=InternetTV {#AppVersion}
+AppVerName={#AppName} {#AppVersion}
 AppPublisher=Diwas Khadka
 AppPublisherURL=https://github.com/diwaskhadka/InternetTV
 VersionInfoVersion={#AppVersion}
-DefaultDirName={autopf}\InternetTV
-DefaultGroupName=InternetTV
+; New installs only; an upgrade keeps the folder it was installed in (UsePreviousAppDir).
+DefaultDirName={autopf}\Madhyasthata
+DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-SetupIconFile=..\InternetTV.Windows\Assets\InternetTV.ico
-UninstallDisplayIcon={app}\InternetTV.exe
-UninstallDisplayName=InternetTV
+SetupIconFile=..\InternetTV.Windows\Assets\app.ico
+UninstallDisplayIcon={app}\{#AppExe}
+UninstallDisplayName={#AppName}
 OutputDir={#OutputDir}
-OutputBaseFilename=InternetTV-Setup-{#AppVersion}
+OutputBaseFilename=Madhyasthata-Setup-{#AppVersion}
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -47,13 +56,17 @@ Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription
 [InstallDelete]
 ; Drop files of the previous version (e.g. removed VLC plugins) before copying the new ones.
 Type: filesandordirs; Name: "{app}\libvlc"
+; Upgrading from InternetTV 0.4.x: remove the old exe and shortcuts, so one app is left.
+Type: files; Name: "{app}\InternetTV.exe"
+Type: files; Name: "{autoprograms}\InternetTV.lnk"
+Type: files; Name: "{autodesktop}\InternetTV.lnk"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Excludes: "README-FIRST.txt"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\InternetTV"; Filename: "{app}\InternetTV.exe"
-Name: "{autodesktop}\InternetTV"; Filename: "{app}\InternetTV.exe"; Tasks: desktopicon
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\InternetTV.exe"; Description: "Start InternetTV"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#AppExe}"; Description: "Start {#AppName}"; Flags: nowait postinstall skipifsilent
