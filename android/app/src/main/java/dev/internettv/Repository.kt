@@ -835,6 +835,6 @@ class Repository(context: Context) {
     companion object {
         const val TAG = "InternetTV"
         private const val OS_SECRET = -1 // Secrets id of the OpenSubtitles password
-        const val USER_AGENT = "Mozilla/5.0 (Linux; Android TV) InternetTV/0.6"
+        const val USER_AGENT = "Mozilla/5.0 (Linux; Android TV) ${Brand.NAME}/0.6"
     }
 }

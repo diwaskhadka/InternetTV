@@ -70,7 +70,7 @@ jobs:
           path: iptvcore-*.zip
 
   windows-app:
-    name: windows app (InternetTV.exe)
+    name: windows app (Madhyasthata.exe)
     needs: version
     runs-on: windows-latest
     steps:
@@ -84,7 +84,7 @@ jobs:
         shell: pwsh
         # Errors are re-emitted as annotations so they are visible via the API, not only in raw logs.
         run: |
-          dotnet publish windows/InternetTV.Windows/InternetTV.Windows.csproj -c Release -r win-x64 --self-contained true -o publish/InternetTV 2>&1 | Tee-Object -FilePath build.log
+          dotnet publish windows/InternetTV.Windows/InternetTV.Windows.csproj -c Release -r win-x64 --self-contained true -o publish/Madhyasthata 2>&1 | Tee-Object -FilePath build.log
           if ($LASTEXITCODE -ne 0) {
             Select-String -Path build.log -Pattern ': error |error NU|error MSB|error CS' | Select-Object -First 40 | ForEach-Object { Write-Host "::error::$($_.Line.Trim())" }
             exit 1
@@ -92,29 +92,29 @@ jobs:
       - name: Smoke test - starts without errors
         shell: pwsh
         run: |
-          $top = Get-ChildItem publish/InternetTV | ForEach-Object { if ($_.PSIsContainer) { "$($_.Name)/" } else { $_.Name } }
+          $top = Get-ChildItem publish/Madhyasthata | ForEach-Object { if ($_.PSIsContainer) { "$($_.Name)/" } else { $_.Name } }
           Write-Host "::notice::Publish folder: $($top -join ', ')"
-          Write-Host "::notice::libvlc/win-x64 present: $(Test-Path publish/InternetTV/libvlc/win-x64/libvlc.dll)"
-          $log = Join-Path $env:LOCALAPPDATA "InternetTV\error.log"
+          Write-Host "::notice::libvlc/win-x64 present: $(Test-Path publish/Madhyasthata/libvlc/win-x64/libvlc.dll)"
+          $log = Join-Path $env:LOCALAPPDATA "Madhyasthata\error.log"
           Remove-Item $log -ErrorAction SilentlyContinue
-          $p = Start-Process publish/InternetTV/InternetTV.exe -PassThru
+          $p = Start-Process publish/Madhyasthata/Madhyasthata.exe -PassThru
           Start-Sleep -Seconds 20
           $alive = -not $p.HasExited
           if ($alive) { Stop-Process -Id $p.Id -Force }
           if (Test-Path $log) { Get-Content $log | Select-Object -First 30 | ForEach-Object { Write-Host "::error::$_" }; exit 1 }
-          if (-not $alive) { Write-Host "::error::InternetTV exited during startup (code $($p.ExitCode))"; exit 1 }
-          Write-Host "InternetTV.exe started and stayed up for 20 s"
+          if (-not $alive) { Write-Host "::error::Madhyasthata exited during startup (code $($p.ExitCode))"; exit 1 }
+          Write-Host "Madhyasthata.exe started and stayed up for 20 s"
       - name: Check layout and zip
         shell: pwsh
         run: |
-          Copy-Item windows/README-FIRST.txt publish/InternetTV/
-          if (-not (Test-Path publish/InternetTV/InternetTV.exe)) { Write-Host "::error::InternetTV.exe missing from publish output"; exit 1 }
-          $top = Get-ChildItem publish/InternetTV | Select-Object -ExpandProperty Name
+          Copy-Item windows/README-FIRST.txt publish/Madhyasthata/
+          if (-not (Test-Path publish/Madhyasthata/Madhyasthata.exe)) { Write-Host "::error::Madhyasthata.exe missing from publish output"; exit 1 }
+          $top = Get-ChildItem publish/Madhyasthata | Select-Object -ExpandProperty Name
           Write-Host "::notice::Top-level files: $($top -join ', ')"
           if ($top.Count -gt 12) { Write-Host "::error::Too many top-level files ($($top.Count)); single-file publish did not apply"; exit 1 }
-          $mb = [math]::Round(((Get-ChildItem publish/InternetTV -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
+          $mb = [math]::Round(((Get-ChildItem publish/Madhyasthata -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
           Write-Host "::notice::Unpacked size: $mb MB"
-          Compress-Archive -Path publish/InternetTV -DestinationPath InternetTV-${{ env.TAG }}-windows-x64.zip
+          Compress-Archive -Path publish/Madhyasthata -DestinationPath Madhyasthata-${{ env.TAG }}-windows-x64.zip
       - name: Build the Windows installer (Inno Setup)
         shell: pwsh
         run: |
@@ -122,7 +122,7 @@ jobs:
           if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null; $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
           $v = "$env:TAG".TrimStart('v')
-          & $iscc /Q "/DAppVersion=$v" "/DSourceDir=$PWD\publish\InternetTV" "/DOutputDir=$PWD\setup" windows/installer/InternetTV.iss
+          & $iscc /Q "/DAppVersion=$v" "/DSourceDir=$PWD\publish\Madhyasthata" "/DOutputDir=$PWD\setup" windows/installer/InternetTV.iss
           if ($LASTEXITCODE -ne 0) { Write-Host "::error::Inno Setup failed ($LASTEXITCODE)"; exit 1 }
           $exe = Get-ChildItem setup/*.exe | Select-Object -First 1
           Write-Host "::notice::Installer: $($exe.Name), $([math]::Round($exe.Length / 1MB, 1)) MB"
@@ -132,25 +132,25 @@ jobs:
           $exe = (Get-ChildItem setup/*.exe | Select-Object -First 1).FullName
           $p = Start-Process $exe -ArgumentList "/VERYSILENT", "/CURRENTUSER", "/SUPPRESSMSGBOXES", "/NORESTART", "/LOG=setup.log" -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content setup.log -Tail 30 | ForEach-Object { Write-Host "::error::$_" }; exit 1 }
-          $app = Join-Path $env:LOCALAPPDATA "Programs\InternetTV\InternetTV.exe"
-          if (-not (Test-Path $app)) { Write-Host "::error::InternetTV.exe not installed at $app"; exit 1 }
-          if (-not (Test-Path (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\InternetTV.lnk"))) { Write-Host "::error::Start menu shortcut missing"; exit 1 }
+          $app = Join-Path $env:LOCALAPPDATA "Programs\Madhyasthata\Madhyasthata.exe"
+          if (-not (Test-Path $app)) { Write-Host "::error::Madhyasthata.exe not installed at $app"; exit 1 }
+          if (-not (Test-Path (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Madhyasthata.lnk"))) { Write-Host "::error::Start menu shortcut missing"; exit 1 }
           $r = Start-Process $app -PassThru; Start-Sleep -Seconds 15
-          if ($r.HasExited) { Write-Host "::error::installed InternetTV exited during startup"; exit 1 }
+          if ($r.HasExited) { Write-Host "::error::installed Madhyasthata exited during startup"; exit 1 }
           Stop-Process -Id $r.Id -Force; Start-Sleep -Seconds 2
           $un = Get-ChildItem (Split-Path $app) -Filter "unins*.exe" | Select-Object -First 1
           $u = Start-Process $un.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait -PassThru
           Start-Sleep -Seconds 3
-          if (Test-Path $app) { Write-Host "::error::uninstall left InternetTV.exe behind"; exit 1 }
+          if (Test-Path $app) { Write-Host "::error::uninstall left Madhyasthata.exe behind"; exit 1 }
           Write-Host "::notice::Installer installs, starts and uninstalls cleanly"
       - uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: InternetTV-${{ env.TAG }}-windows-x64.zip
+          path: Madhyasthata-${{ env.TAG }}-windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: windows-setup
-          path: setup/InternetTV-Setup-*.exe
+          path: setup/Madhyasthata-Setup-*.exe
 
   android:
     needs: version
@@ -195,13 +195,13 @@ jobs:
           if grep -q "CN=Android Debug" certs.txt; then echo "::error::APK is signed with the debug key"; exit 1; fi
       - name: Package
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk "InternetTV-$TAG-androidtv.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "Madhyasthata-$TAG-androidtv.apk"
           (cd android/app/src/main && zip -qr "$GITHUB_WORKSPACE/iptvcore-$TAG-android-jniLibs.zip" jniLibs)
       - uses: actions/upload-artifact@v4
         with:
           name: android
           path: |
-            InternetTV-*.apk
+            Madhyasthata-*.apk
             iptvcore-*-android-jniLibs.zip
 
   publish:
@@ -218,17 +218,17 @@ jobs:
       - name: Split public / developer files
         run: |
           mkdir -p public dev
-          mv dist/InternetTV-Setup-*.exe public/
-          mv dist/InternetTV-*-androidtv.apk public/
+          mv dist/Madhyasthata-Setup-*.exe public/
+          mv dist/Madhyasthata-*-androidtv.apk public/
           mv dist/* dev/
           ls -la public dev
       - name: Release notes (install steps + this version's CHANGELOG section)
         run: |
           v="${TAG#v}"
           {
-            echo "**Windows 10 / 11 (64-bit):** download \`InternetTV-Setup-$v.exe\` and run it. It installs for your user account (no admin needed) and upgrades in place, keeping your playlists and settings. \"Windows protected your PC\"? InternetTV is not code-signed yet: click **More info** > **Run anyway**."
+            echo "**Windows 10 / 11 (64-bit):** download \`Madhyasthata-Setup-$v.exe\` and run it. It installs for your user account (no admin needed) and upgrades in place, keeping your playlists and settings. \"Windows protected your PC\"? Madhyasthata is not code-signed yet: click **More info** > **Run anyway**."
             echo
-            echo "**Android TV / Google TV:** download \`InternetTV-$TAG-androidtv.apk\` and install it (sideload, e.g. with *Send Files to TV* or \`adb install\`). Newer versions install over it and keep your playlists."
+            echo "**Android TV / Google TV:** download \`Madhyasthata-$TAG-androidtv.apk\` and install it (sideload, e.g. with *Send Files to TV* or \`adb install\`). Newer versions install over it and keep your playlists."
             echo
             # The "## X.Y.Z" section of CHANGELOG.md, without its heading.
             awk -v ver="$v" '$0 ~ "^## " ver "( |$)" {on=1; next} on && /^## / {exit} on {print}' CHANGELOG.md
@@ -238,7 +238,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
-          name: InternetTV ${{ env.TAG }}
+          name: Madhyasthata ${{ env.TAG }}
           target_commitish: ${{ github.sha }}
           files: public/*
           body_path: notes.md

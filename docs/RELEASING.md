@@ -1,4 +1,4 @@
-# Releasing InternetTV
+# Releasing Madhyasthata
 
 All platforms share one version and one GitHub release.
 
@@ -66,3 +66,19 @@ to the debug key; such APKs are for testing only.
    and add that file to the "public" list in the `publish` job.
 3. Add a `### <Platform>` subsection to every new changelog section.
 4. Add its install steps to the release notes text in `release.yml` and to `README.md`.
+5. Brand it (next section).
+
+## Branding
+
+Name and icon sources live in [`branding/`](../branding/README.md):
+
+- **Name:** `branding/brand.ini` (`name=Madhyasthata`, `native_name=मध्यस्थता`). Make the new
+  platform's build read it, as Android (`build.gradle.kts`) and Windows (the `.csproj` and the
+  installer) do, instead of writing the name in its code. The launcher label uses the Latin
+  name; About shows both.
+- **Icon:** `branding/icon.svg` is the master; `branding/banner.svg` is the 16:9 TV banner.
+  Add the platform's sizes to `branding/build.py` (or draw a vector copy, like Android's
+  adaptive icon) and keep the colour tokens from `branding/README.md`.
+- **IDs:** pick the platform's bundle or package ID once, before its first release, and never
+  change it (Android: `dev.madhyasthata`). Same for install and data folder names.
+- **Release file:** name it `Madhyasthata-…` like the others.

@@ -45,6 +45,7 @@ import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
 import dev.internettv.Account
+import dev.internettv.Brand
 import dev.internettv.FreeTv
 import dev.internettv.Group
 import dev.internettv.MainViewModel
@@ -402,7 +403,7 @@ private fun LazyListScope.live(vm: MainViewModel) {
     item { SwitchRow("Hide name prefixes", "\"UK: BBC One\" becomes \"BBC One\"", st.stripPrefixes) { vm.changeSettings { stripPrefixes = it } } }
     item {
         ChoiceRow(
-            "Start in", "The page InternetTV opens with",
+            "Start in", "The page ${Brand.NAME} opens with",
             st.startupSection,
             listOf("Last" to "Last page", "Home" to "Home", "Live" to "Live TV", "Movies" to "Movies", "Series" to "Series", "Favorites" to "Favorites", "Recent" to "Recent"),
         ) { vm.changeSettings { startupSection = it } }
@@ -460,7 +461,7 @@ private fun LazyListScope.playback(vm: MainViewModel) {
     }
     item {
         ChoiceRow(
-            "Buffer before playing", "Longer is steadier on slow networks but starts later. Applies after restarting InternetTV",
+            "Buffer before playing", "Longer is steadier on slow networks but starts later. Applies after restarting ${Brand.NAME}",
             st.bufferMs, listOf(800 to "0.8 s", 1500 to "1.5 s", 3000 to "3 s", 6000 to "6 s"),
         ) { vm.changeSettings { bufferMs = it } }
     }
@@ -504,7 +505,7 @@ private fun LazyListScope.guide(vm: MainViewModel) {
     item { SectionTitle("Guide (EPG)") }
     item {
         ChoiceRow(
-            "Update guides every", "Checked when InternetTV starts",
+            "Update guides every", "Checked when ${Brand.NAME} starts",
             st.epgRefreshHours, listOf(6 to "6 hours", 12 to "12 hours", 24 to "24 hours", 48 to "2 days"),
         ) { vm.changeSettings { epgRefreshHours = it } }
     }
@@ -553,12 +554,12 @@ private fun AboutRows(vm: MainViewModel) {
         }
     }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        SectionTitle("About InternetTV")
+        SectionTitle("About ${Brand.NAME} · ${Brand.NATIVE_NAME}")
         ActionRow("Version", value = version) {}
         ActionRow("Engine (iptvcore)", value = vm.engineVersion) {}
         ActionRow("Clear watch history", "Empties the Recent list") { vm.clearHistory() }
         Text(
-            "InternetTV plays your own playlists and ships with no channels. Free TV channels come from iptv-org.",
+            "${Brand.NAME} plays your own playlists and ships with no channels. Free TV channels come from iptv-org.",
             color = Muted, fontSize = 12.sp, modifier = Modifier.padding(12.dp),
         )
     }

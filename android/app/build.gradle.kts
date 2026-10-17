@@ -9,17 +9,27 @@ plugins {
 val appVersion: String = rootProject.file("../VERSION").readText().trim()
 val appVersionCode: Int = appVersion.split(".").map { it.toInt() }.let { (a, b, c) -> a * 10000 + b * 100 + c }
 
+// The display name, shared by every platform: branding/brand.ini (see branding/README.md).
+val brand: Map<String, String> = rootProject.file("../branding/brand.ini").readLines(Charsets.UTF_8)
+    .map { it.trim() }.filter { "=" in it && !it.startsWith(";") }
+    .associate { it.substringBefore("=").trim() to it.substringAfter("=").trim() }
+
 android {
     namespace = "dev.internettv"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.internettv"
+        // Fixed after the first release: Android treats another id as another app. The Kotlin
+        // package (namespace) keeps the project's code name.
+        applicationId = "dev.madhyasthata"
         // Android 5.0: the oldest Android TV release still found on cheap boxes.
         minSdk = 21
         targetSdk = 35
         versionCode = appVersionCode
         versionName = appVersion
+        resValue("string", "app_name", brand.getValue("name"))
+        buildConfigField("String", "APP_NAME", "\"${brand.getValue("name")}\"")
+        buildConfigField("String", "APP_NATIVE_NAME", "\"${brand.getValue("native_name")}\"")
         ndk {
             // Must match the ABIs built by cargo-ndk (see .github/workflows/ci.yml).
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -55,6 +65,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     sourceSets["main"].apply {

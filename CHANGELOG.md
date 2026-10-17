@@ -11,8 +11,16 @@ How to cut a release and how to add a platform: [docs/RELEASING.md](docs/RELEASI
 First release with one version for every platform: the Windows installer and the Android TV
 app are published together.
 
+The app has a new name, **Madhyasthata** (मध्यस्थता), and a new icon: a folded ribbon play
+mark in the crimson and blue of the Nepal flag. Name and icon come from one place for every
+platform, [branding/](branding/README.md). Release files are now `Madhyasthata-Setup-X.Y.Z.exe`
+and `Madhyasthata-vX.Y.Z-androidtv.apk`.
+
 ### Windows
-- Version number aligned with the other platforms: 0.4.11 → 0.9.0. No functional changes.
+- Version number aligned with the other platforms: 0.4.11 → 0.9.0.
+- **Renamed to Madhyasthata:** window title, Start menu and desktop shortcuts, Settings > Apps, `Madhyasthata.exe`; About shows मध्यस्थता too.
+- **New icon** for the exe, the window, the sidebar and the installer.
+- **Upgrades InternetTV 0.4.x in place:** setup replaces `InternetTV.exe` and its Start menu and desktop shortcuts, leaving one app in Settings > Apps. On first start, playlists, settings, favorites and progress move from `%LOCALAPPDATA%\InternetTV` to `%LOCALAPPDATA%\Madhyasthata`; saved passwords keep working.
 
 ### Android TV (first public release)
 Built in steps 0.5 to 0.9 (never published separately), to match Windows 0.4.11:
@@ -23,6 +31,8 @@ Built in steps 0.5 to 0.9 (never published separately), to match Windows 0.4.11:
 - **Home:** continue-watching banner and rows of favorites, recent channels and recently added; each row can be turned off.
 - **Settings:** playlists (refresh, update guide, test connection, edit with user agent, remove, Xtream account status), appearance (dark, light or follow the TV, cover size, titles under covers), hidden categories and their order, live stream format, buffer, preferred languages, guide refresh interval, time offset and extra guide URLs, OMDb and OpenSubtitles keys.
 - **Security:** Xtream and OpenSubtitles passwords are encrypted with an Android Keystore key and left out of the catalog snapshot.
+- **Name and icon:** Madhyasthata on the launcher, मध्यस्थता too on the Google TV banner and in About; adaptive launcher icon with a themed (monochrome) layer, and a 320×180 home-row banner.
+- Package ID `dev.madhyasthata`.
 - Android 5.0 (API 21) and later; built for ARM 32/64-bit and x86_64.
 
 ### Engine

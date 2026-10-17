@@ -1,4 +1,7 @@
-# InternetTV — iptvcore
+# Madhyasthata (मध्यस्थता) — iptvcore
+
+Madhyasthata is an IPTV player for your own playlists, on Windows and Android TV, built on one
+Rust engine. (InternetTV is the project's code name, kept in the repository and the code.)
 
 ## Download
 
@@ -6,10 +9,10 @@ The [latest release](https://github.com/diwaskhadka/InternetTV/releases/latest) 
 
 | Platform | File | Install |
 |---|---|---|
-| Windows 10 / 11 (64-bit) | `InternetTV-Setup-X.Y.Z.exe` | Run it; it installs for your account and upgrades in place. |
-| Android TV / Google TV (Android 5+) | `InternetTV-vX.Y.Z-androidtv.apk` | Sideload it (e.g. *Send Files to TV*, or `adb install`). Newer versions install over it. |
+| Windows 10 / 11 (64-bit) | `Madhyasthata-Setup-X.Y.Z.exe` | Run it; it installs for your account and upgrades in place. |
+| Android TV / Google TV (Android 5+) | `Madhyasthata-vX.Y.Z-androidtv.apk` | Sideload it (e.g. *Send Files to TV*, or `adb install`). Newer versions install over it. |
 
-What changed on each platform: [CHANGELOG.md](CHANGELOG.md). How releases are made: [docs/RELEASING.md](docs/RELEASING.md).
+What changed on each platform: [CHANGELOG.md](CHANGELOG.md). How releases are made: [docs/RELEASING.md](docs/RELEASING.md). Name, icon and colours: [branding/](branding/README.md).
 
 ## The engine
 

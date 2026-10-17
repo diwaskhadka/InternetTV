@@ -48,6 +48,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import dev.internettv.Brand
 import dev.internettv.Item
 import dev.internettv.MainViewModel
 import dev.internettv.Section
@@ -117,7 +118,7 @@ private fun Hero(vm: MainViewModel, item: Item?) {
                 Text(if (item != null) "CONTINUE WATCHING" else "WELCOME BACK", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 Text(
                     when {
-                        item == null -> vm.source?.name ?: "InternetTV"
+                        item == null -> vm.source?.name ?: Brand.NAME
                         item.isEpisode -> "${item.seasonEpisode}  ${item.name}"
                         else -> item.name
                     },
