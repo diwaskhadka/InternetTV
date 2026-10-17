@@ -1,5 +1,18 @@
 # InternetTV — iptvcore
 
+## Download
+
+The [latest release](https://github.com/diwaskhadka/InternetTV/releases/latest) has every platform, all with the same version number:
+
+| Platform | File | Install |
+|---|---|---|
+| Windows 10 / 11 (64-bit) | `InternetTV-Setup-X.Y.Z.exe` | Run it; it installs for your account and upgrades in place. |
+| Android TV / Google TV (Android 5+) | `InternetTV-vX.Y.Z-androidtv.apk` | Sideload it (e.g. *Send Files to TV*, or `adb install`). Newer versions install over it. |
+
+What changed on each platform: [CHANGELOG.md](CHANGELOG.md). How releases are made: [docs/RELEASING.md](docs/RELEASING.md).
+
+## The engine
+
 A platform-independent IPTV engine in Rust. It handles M3U/M3U8 playlists, XMLTV guides and Xtream Codes panels. It keeps everything in an indexed catalog with search, now/next and the EPG grid, plus favorites, watch progress and offline snapshots.
 
 The engine is meant to sit under any number of native UIs: Android TV, Windows, and anything later. Every platform calls it through one small C ABI.

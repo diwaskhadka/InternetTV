@@ -197,7 +197,7 @@ private fun ChannelRow(vm: MainViewModel, title: String, list: List<Item>) {
                         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
                         // A tinted highlight: many logos are white and would vanish on a white card.
                         colors = ClickableSurfaceDefaults.colors(containerColor = Panel, focusedContainerColor = Color(0xFF3A4785)),
-                        border = ClickableSurfaceDefaults.border(focusedBorder = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(2.dp, Color.White))),
+                        border = ClickableSurfaceDefaults.border(focusedBorder = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(2.dp, TextColor))),
                     ) {
                         Box(Modifier.fillMaxSize().padding(14.dp), contentAlignment = Alignment.Center) {
                             Logo(ch, 120.dp, 64.dp, strip)
